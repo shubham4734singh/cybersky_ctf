@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Challenge - Copy Paste Kiya Toh Darna Kya</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(45deg, #ff006e, #8338ec, #3a86ff, #06ffa5, #ffbe0b, #fb5607);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.85);
+            border: 3px solid #ffffff;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.4), 
+                        inset 0 0 20px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            color: #ffbe0b;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(255, 190, 11, 0.8);
+            font-size: 2.2em;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 15px rgba(255, 190, 11, 0.8); }
+            to { text-shadow: 0 0 25px rgba(255, 190, 11, 1), 0 0 35px rgba(255, 190, 11, 0.8); }
+        }
+
+        .challenge-text {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .copy-x {
+            background: linear-gradient(45deg, #ff006e, #8338ec);
+            border: 2px solid #ffffff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: text;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.4);
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+
+        .instructions {
+            background: linear-gradient(45deg, rgba(255, 190, 11, 0.2), rgba(251, 86, 7, 0.2));
+            border: 2px solid #ffbe0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            color: #ffbe0b;
+            box-shadow: 0 0 15px rgba(255, 190, 11, 0.3);
+        }
+
+        .hint {
+            background: linear-gradient(45deg, rgba(255, 107, 107, 0.2), rgba(255, 0, 110, 0.2));
+            border: 2px solid #ff6b6b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            color: #ff6b6b;
+            font-style: italic;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .fake-hint {
+            background: linear-gradient(45deg, rgba(58, 134, 255, 0.2), rgba(131, 56, 236, 0.2));
+            border: 2px solid #3a86ff;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            color: #3a86ff;
+            font-style: italic;
+            box-shadow: 0 0 15px rgba(58, 134, 255, 0.3);
+        }
+
+        .fake-hint2 {
+            background: linear-gradient(45deg, rgba(6, 255, 165, 0.2), rgba(58, 134, 255, 0.2));
+            border: 2px solid #06ffa5;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            color: #06ffa5;
+            font-style: italic;
+            box-shadow: 0 0 15px rgba(6, 255, 165, 0.3);
+        }
+
+        .flag-display {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ff6b6b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            color: #ff6b6b;
+            display: none;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.15;
+            z-index: 0;
+        }
+
+        @keyframes matrix {
+            0% { transform: translateY(-100vh); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            animation: matrix 4s linear infinite;
+            text-shadow: 0 0 10px currentColor;
+        }
+        
+        /* Add floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ffffff;
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+            opacity: 0.7;
+            box-shadow: 0 0 6px currentColor;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .hidden-flag {
+            display: none;
+        }
+
+        .decoy-script {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="matrix-bg" id="matrixBg"></div>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <h1>🎯 Beginner Web Challenge</h1>
+        
+        <div class="challenge-text">
+            Welcome to the cybersecurity challenge! Your mission seems simple...
+        </div>
+        
+        <div class="copy-x" id="copyx">
+            Copy This… I Dare You!
+        </div>
+        
+        <div class="fake-hint">
+            🔍 Hint: Try inspecting the element to find hidden clues!
+        </div>
+        
+        <div class="fake-hint2">
+            🔎 Hint: Check the page source for hidden flags!
+        </div>
+        
+        <div class="hint">
+            💡 Hint: JavaScript can do sneaky things when you're not looking...
+        </div>
+        
+        <!-- Decoy flags to confuse students -->
+        <div class="hidden-flag">FLAG{n0t_th3_r34l_fl4g}</div>
+        <div class="hidden-flag">FLAG{k33p_l00k1ng}</div>
+        <!-- flag{f4k3_fl4g_1n_c0mm3nt} -->
+        <span style="display:none;">FLAG{h1dd3n_but_n0t_r34l}</span>
+    
+    </div>
+
+
+    <script class="decoy-script">
+
+        const fakeFlag = "FLAG{d3c0y_scr1pt_fl4g}";
+        console.log("Decoy script loaded");
+    </script>
+
+    <script>
+
+        const chars = '01';
+        const target = 'Copy This… I Dare You!';
+        const delay = 1000;
+
+        function initVisuals() {
+            const bg = document.getElementById('matrixBg');
+            const particles = document.getElementById('particles');
+
+            for (let i = 0; i < 60; i++) {
+                const el = document.createElement('div');
+                el.className = 'matrix-char';
+                el.textContent = chars[Math.floor(Math.random() * chars.length)];
+                el.style.left = Math.random() * 100 + '%';
+                el.style.animationDelay = Math.random() * 4 + 's';
+                el.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                el.style.color = ['#ffffff', '#ffbe0b', '#ff006e', '#3a86ff', '#06ffa5'][Math.floor(Math.random() * 5)];
+                bg.appendChild(el);
+            }
+            
+            // Add floating particles
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                particle.style.background = ['#ffffff', '#ffbe0b', '#ff006e', '#3a86ff', '#06ffa5'][Math.floor(Math.random() * 5)];
+                particles.appendChild(particle);
+            }
+        }
+
+        const p1 = 'SYNT';
+        const p2 = '*py>}o=n!';
+        const p3 = 'qlu>wnpx>';
+        const p4 = '{tl>"l!@ny,';
+
+        
+
+        function generateDecoyFlag() {
+            return 'FLAG{' + Math.random().toString(36).substr(2, 9) + '}';
+        }
+        
+        function logDecoyActivity() {
+            console.log('Checking for flags...');
+            console.log('Found decoy:', generateDecoyFlag());
+        }
+
+        document.addEventListener('copy', function(evt) {
+            const selected = window.getSelection().toString();
+            if (selected.includes(target)) {
+                evt.preventDefault();
+
+                const realFlag = p1 + p2 + p3 + p4;
+                evt.clipboardData.setData('text/plain', realFlag);
+
+                setTimeout(() => {
+                    logDecoyActivity();
+                    document.getElementById('flagDisplay').style.display = 'block';
+                }, delay);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded - searching for flags...');
+            logDecoyActivity();
+        });
+
+        document.getElementById('copyTarget').addEventListener('mousedown', function() {
+            console.log('Target selected');
+        });
+
+        initVisuals();
+
+        console.log('Security check: No flags found in console');
+        console.log('Hint: Try right-clicking and viewing source');
+    </script>
+
+    <script>
+        const config = {
+            challenge: "clipboard_hijack",
+            difficulty: "beginner",
+            fake_flag: "FLAG{n1c3_try_but_wr0ng}",
+            hint: "The real flag is not in the source code"
+        };
+    </script>
+</body>
+</html>
